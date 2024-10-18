@@ -2,7 +2,7 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -29,13 +29,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: std::cmp::PartialOrd + Clone> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T :std::cmp::PartialOrd + Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -69,14 +69,30 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	pub fn merge(mut list_a:LinkedList<T>,mut list_b:LinkedList<T>) -> Self
 	{
 		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+        let mut list_c=LinkedList::new();
+        while list_a.start.is_some()&&list_b.start.is_some(){
+            let (Some(node_a),Some(node_b))=(list_a.start,list_b.start)else{todo!()};
+            unsafe{
+                if (*node_a.as_ptr()).val<=(*node_b.as_ptr()).val{
+                    list_c.add((*node_a.as_ptr()).val.clone());
+                    list_a.start=(*node_a.as_ptr()).next;
+                }else{
+                    list_c.add((*node_b.as_ptr()).val.clone());
+                    list_b.start=(*node_b.as_ptr()).next;
+                }
+            }
         }
+        let mut remained= if list_a.start.is_some() {list_a.start} else {list_b.start};
+        while let Some(node)=remained{
+            unsafe{
+                list_c.add((*node.as_ptr()).val.clone());
+                remained=(*node.as_ptr()).next;
+            }
+        }
+        list_c
 	}
 }
 
